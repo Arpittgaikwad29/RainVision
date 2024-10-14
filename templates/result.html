@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediction Result</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      color: #fff;
+      text-align: center;
+      padding: 50px;
+      margin: 0;
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+
+    .weather-container {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .result-text {
+      font-size: 1.7em;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .rain-text {
+      color: #3498db;
+    }
+
+    .sunny-text {
+      color: #f39c12;
+    }
+
+    /* Background image for rain */
+    .rain-bg {
+      background-image: url('/static/rainy.jpg.jpg'); /* Replace with actual URL */
+    }
+
+    /* Background image for sunny */
+    .sunny-bg {
+      background-image: url('/static/sunny.jpg.jpg'); /* Replace with actual URL */
+    }
+  </style>
+</head>
+<body class="{% if prediction == 'Rain' %}rain-bg{% else %}sunny-bg{% endif %}">
+  <div class="weather-container">
+    <h1>Rain Prediction Result</h1>
+    <p>Place: {{ place }}</p>
+    <p>Date: {{ date }}</p>
+    <p>Weather Description: {{ description }}</p>
+
+    {% if prediction == "Rain" %}
+    <p class="result-text rain-text">Rain is expected 🌧️</p>
+    {% else %}
+    <p class="result-text sunny-text">No Rain, it's a sunny day ☀️</p>
+    {% endif %}
+  </div>
+</body>
+</html>

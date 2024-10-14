@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rain Prediction</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Rain Prediction</h1>
+    <form action="/Predict" method="POST">
+      <label for="place">Place:</label>
+      <select id="place" name="place" required>
+        <option value="">Select Place</option>
+        <option value="dadar">Dadar</option>
+        <option value="thane">Thane</option>
+        <option value="kalyan">Kalyan</option>
+        <option value="bandra">Bandra</option>
+        <option value="borivali">Borivali</option>
+        <option value="andheri">Andheri</option>
+        <option value="goregaon">Goregaon</option>
+        <option value="mulund">Mulund</option>
+        <option value="vikhroli">Vikhroli</option>
+        <option value="powai">Powai</option>
+        <option value="chembur">Chembur</option>
+        <option value="kurla">Kurla</option>
+        <option value="navi-mumbai">Navi Mumbai</option>
+        <option value="panvel">Panvel</option>
+        <option value="vile-parle">Vile Parle</option>
+        <option value="malad">Malad</option>
+        <option value="sion">Sion</option>
+        <option value="colaba">Colaba</option>
+        <option value="worli">Worli</option>
+        <option value="matunga">Matunga</option>
+      </select>
+
+      <label for="date">Select Date:</label>
+      <select id="date" name="date" required>
+        <option value="">Select Date</option>
+        <option value="today">Today</option>
+        <option value="tomorrow">Tomorrow</option>
+        <option value="day_after_tomorrow">Day After Tomorrow</option>
+        <option value="day-4">Day 4</option>
+        <option value="day-5">Day 5</option>
+      </select>
+
+      <button type="submit">Predict</button>
+    </form>
+  </div>
+</body>
+</html>
