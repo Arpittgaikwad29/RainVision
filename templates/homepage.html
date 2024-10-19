@@ -1,53 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rain Prediction</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RainVision</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        /* Welcome Screen Animation */
+        .welcome {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #2C3E50;  /* Dark Blue */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+            font-size: 2.5rem;
+            font-family: 'Arial', sans-serif;
+            transition: transform 1s ease-in-out;
+        }
+
+        .welcome.slide-out {
+            transform: translateY(-100%);
+        }
+
+        /* Main Content */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ECF0F1;  /* Light Gray */
+            color: #2C3E50;  /* Dark Blue */
+            height: 100vh;  /* Full height */
+            overflow: hidden;  /* Hide overflow */
+        }
+
+        /* Map */
+        #map {
+            position: fixed;  /* Fixed position for full background */
+            top: 0;
+            left: 0;
+            height: 100vh;  /* Full viewport height */
+            width: 100vw;  /* Full viewport width */
+            z-index: 1;  /* Behind other content */
+        }
+
+        .main-content {
+            position: relative;  /* Position relative to the map */
+            z-index: 2;  /* In front of the map */
+            text-align: left;  /* Align text to the left */
+            padding: 20px;
+            opacity: 0;  /* Start hidden, will fade in */
+            transition: opacity 0.5s ease-in-out;
+            width: 300px;  /* Width of the content box */
+            background-color: rgba(255, 255, 255, 0.8);  /* Semi-transparent background */
+            border-radius: 10px;  /* Rounded corners */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);  /* Box shadow */
+            margin: 20px;  /* Margin for spacing */
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #1A1A1A;  /* Dark color for title */
+        }
+
+        form {
+            margin-top: 20px;
+            display: inline-block;
+            text-align: left;
+            width: 100%;  /* Full width of the form */
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            font-size: 1.2rem;
+        }
+
+        select,
+        button {
+            padding: 10px;
+            font-size: 1rem;
+            width: 100%;
+            margin: 10px 0;
+            border: 1px solid #2C3E50;  /* Dark Blue */
+            border-radius: 5px;
+        }
+
+        select:focus, 
+        button:focus {
+            outline: none;
+            border-color: #18BC9C;  /* Turquoise */
+        }
+
+        button {
+            background-color: #18BC9C;  /* Turquoise */
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #16A085;  /* Slightly darker Turquoise */
+        }
+
+        #error-msg {
+            color: #E74C3E;  /* Red */
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* For mobile responsiveness */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+
+            select, 
+            button {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Position title on the left */
+        .rainvision-title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2.5rem;
+            color: #1A1A1A;  /* Dark color */
+            z-index: 2;  /* In front of the map */
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Rain Prediction</h1>
-    <form action="/Predict" method="POST">
-      <label for="place">Place:</label>
-      <select id="place" name="place" required>
-        <option value="">Select Place</option>
-        <option value="dadar">Dadar</option>
-        <option value="thane">Thane</option>
-        <option value="kalyan">Kalyan</option>
-        <option value="bandra">Bandra</option>
-        <option value="borivali">Borivali</option>
-        <option value="andheri">Andheri</option>
-        <option value="goregaon">Goregaon</option>
-        <option value="mulund">Mulund</option>
-        <option value="vikhroli">Vikhroli</option>
-        <option value="powai">Powai</option>
-        <option value="chembur">Chembur</option>
-        <option value="kurla">Kurla</option>
-        <option value="navi-mumbai">Navi Mumbai</option>
-        <option value="panvel">Panvel</option>
-        <option value="vile-parle">Vile Parle</option>
-        <option value="malad">Malad</option>
-        <option value="sion">Sion</option>
-        <option value="colaba">Colaba</option>
-        <option value="worli">Worli</option>
-        <option value="matunga">Matunga</option>
-      </select>
+    <div class="welcome" id="welcome-screen">
+        <h1>Welcome to RainVision!</h1>
+    </div>
 
-      <label for="date">Select Date:</label>
-      <select id="date" name="date" required>
-        <option value="">Select Date</option>
-        <option value="today">Today</option>
-        <option value="tomorrow">Tomorrow</option>
-        <option value="day_after_tomorrow">Day After Tomorrow</option>
-        <option value="day-4">Day 4</option>
-        <option value="day-5">Day 5</option>
-      </select>
+    <div class="rainvision-title">RainVision</div>
+    <div class="main-content" id="main-content">
+        <form action="/Predict" method="POST">
+            <label for="place">Place:</label>
+            <select id="place-dropdown" name="place">
+                <option value="">Select Place</option>
+                <option value="dadar" data-coords="19.0152,72.8446">Dadar</option>
+                <option value="thane" data-coords="19.2183,72.9781">Thane</option>
+                <option value="kalyan" data-coords="19.2403,73.1558">Kalyan</option>
+                <option value="bandra" data-coords="19.0597,72.8453">Bandra</option>
+                <option value="borivali" data-coords="19.2020,72.8469">Borivali</option>
+                <option value="andheri" data-coords="19.0978,72.8406">Andheri</option>
+                <option value="goregaon" data-coords="19.1371,72.8486">Goregaon</option>
+                <option value="mulund" data-coords="19.1911,72.9734">Mulund</option>
+                <option value="vikhroli" data-coords="19.1318,72.9402">Vikhroli</option>
+                <option value="powai" data-coords="19.1186,72.9154">Powai</option>
+                <option value="chembur" data-coords="19.0678,72.8836">Chembur</option>
+                <option value="kurla" data-coords="19.0604,72.8710">Kurla</option>
+                <option value="navi-mumbai" data-coords="19.0349,73.0228">Navi Mumbai</option>
+                <option value="panvel" data-coords="18.9985,73.1162">Panvel</option>
+                <option value="vile-parle" data-coords="19.0970,72.8434">Vile Parle</option>
+                <option value="malad" data-coords="19.1954,72.8387">Malad</option>
+                <option value="sion" data-coords="19.0396,72.8553">Sion</option>
+                <option value="colaba" data-coords="18.9200,72.8347">Colaba</option>
+                <option value="worli" data-coords="18.9969,72.8234">Worli</option>
+                <option value="matunga" data-coords="19.0221,72.8471">Matunga</option>
+            </select>
 
-      <button type="submit">Predict</button>
-    </form>
-  </div>
+            <input type="hidden" id="coordinates" name="coordinates" required>
+
+            <label for="date">Select Date:</label>
+            <select id="date" name="date" required>
+                <option value="">Select Date</option>
+                <option value="today">Today</option>
+                <option value="tomorrow">Tomorrow</option>
+                <option value="day_after_tomorrow">Day After Tomorrow</option>
+                <option value="day-4">Day 4</option>
+                <option value="day-5">Day 5</option>
+            </select>
+
+            <button type="submit">Predict</button>
+            <p id="error-msg"></p>
+        </form>
+    </div>
+    
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([19.0760, 72.8777], 12); // Centered on Mumbai
+
+        // Add a tile layer to the map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+        }).addTo(map);
+
+        // Welcome screen animation
+        var welcomeScreen = document.getElementById('welcome-screen');
+        var mainContent = document.getElementById('main-content');
+
+        setTimeout(function() {
+            welcomeScreen.classList.add('slide-out');
+            setTimeout(function() {
+                welcomeScreen.style.display = 'none'; // Hide welcome screen
+                mainContent.style.opacity = 1; // Fade in main content
+            }, 1000);
+        }, 2000);
+
+        // Function to handle place selection
+        document.getElementById('place-dropdown').addEventListener('change', function() {
+            var selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                var coords = selectedOption.getAttribute('data-coords').split(',');
+                var lat = parseFloat(coords[0]);
+                var lng = parseFloat(coords[1]);
+                map.setView([lat, lng], 14); // Zoom in on selected place
+                // Update coordinates hidden input
+                document.getElementById('coordinates').value = lat + ',' + lng;
+            } else {
+                // Reset map view to default
+                map.setView([19.0760, 72.8777], 12);
+                document.getElementById('coordinates').value = '';
+            }
+        });
+
+        // Function to handle map click event
+        map.on('click', function(e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+            // Update coordinates hidden input
+            document.getElementById('coordinates').value = lat + ',' + lng;
+
+            // Optionally, you can also add a marker to indicate the clicked location
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup("Coordinates: " + lat.toFixed(5) + ", " + lng.toFixed(5))
+                .openPopup();
+        });
+    </script>
 </body>
 </html>
