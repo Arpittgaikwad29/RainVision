@@ -15,7 +15,7 @@ def get_forecast_data(lat, lon, api_key):
         return data
     else:
         print(f"Error fetching forecast data: {response.status_code}")
-        return None
+        return None  
 
 # Function to extract weather data for a specific day
 def extract_weather_data(forecast_data, day):
@@ -45,79 +45,63 @@ def predict_rainfall(weather_data, model):
     if 'clear sky' in weather_data['description'].lower() or 'sunny' in weather_data['description'].lower():
         return "No Rain"  # Immediately return No Rain
     
+    # Prepare input for model prediction
     X_input = pd.DataFrame([{
         'temp': weather_data['temp'],
         'humidity': weather_data['humidity'],
         'sealevelpressure': weather_data['sealevelpressure'],
         'windspeed': weather_data['windspeed']
     }])
+    
+    # Get prediction from model
     prediction = model.predict(X_input)
     
     return "Rain" if prediction == 1 else "No Rain"
 
-# Define route for prediction page
+# Define route for the homepage
 @app.route('/')
 def index():
-    return render_template('homepage.html')
+    return render_template('index.html')
 
 # Route for handling form submission
 @app.route('/Predict', methods=['POST'])
 def Predict():
     if request.method == 'POST':
         # Fetch form data
-        place = request.form['place'].lower()
+        place = request.form['coordinates']  # This will now contain lat,lng
         date = request.form['date']
 
-        # Areas dictionary containing latitude and longitude
-        areas = {
-            'dadar': (19.0176, 72.8562),
-            'thane': (19.2183, 72.9781),
-            'kalyan': (19.2403, 73.1305),
-            'bandra': (19.0595, 72.8295),
-            'borivali': (19.2290, 72.8571),
-            'andheri': (19.1197, 72.8464),
-            'goregaon': (19.1551, 72.8497),
-            'mulund': (19.1726, 72.9423),
-            'vikhroli': (19.1042, 72.9274),
-            'powai': (19.1165, 72.9043),
-            'chembur': (19.0484, 72.9106),
-            'kurla': (19.0721, 72.8845),
-            'navi mumbai': (19.0330, 73.0297),
-            'panvel': (18.9894, 73.1175),
-            'vile parle': (19.0999, 72.8443),
-            'malad': (19.1870, 72.8484),
-            'sion': (19.0466, 72.8634),
-            'colaba': (18.9067, 72.8147),
-            'worli': (19.0177, 72.8258),
-            'matunga': (19.0233, 72.8562)
-        }
+        # Error handling for unpacking latitude and longitude
+        if place:
+            try:
+                # Split the place value to get latitude and longitude
+                lat, lon = place.split(',')
+                
+                # Replace with your actual API key
+                api_key = "dc57c4b46c6081fa835fbdf62cd2a6e0"
+                
+                # Load your pre-trained RandomForest model
+                rf_model = joblib.load("rf_model.pkl")  # Load the model
 
-        if place not in areas:
-            return "Location not found. Please enter a valid location."
-        
-        lat, lon = areas[place]
-
-        # Replace with your actual API key
-        api_key = "dc57c4b46c6081fa835fbdf62cd2a6e0"
-        
-        # Load your pre-trained RandomForest model
-        rf_model = joblib.load("rf_model.pkl")  # Load the model
-
-        # Fetch weather forecast data
-        forecast_data = get_forecast_data(lat, lon, api_key)
-        
-        if forecast_data:
-            # Extract weather data for the selected day
-            weather_data = extract_weather_data(forecast_data, date)
-            
-            if weather_data:
-                # Predict rainfall
-                rainfall_prediction = predict_rainfall(weather_data, rf_model)
-                return render_template('result.html', place=place, date=date, prediction=rainfall_prediction, description=rainfall_prediction)
-            else:
-                return "Invalid day input."
+                # Fetch weather forecast data
+                forecast_data = get_forecast_data(lat, lon, api_key)
+                
+                if forecast_data:
+                    # Extract weather data for the selected day
+                    weather_data = extract_weather_data(forecast_data, date)
+                    
+                    if weather_data:
+                        # Predict rainfall
+                        rainfall_prediction = predict_rainfall(weather_data, rf_model)
+                        return render_template('result.html', place=place, date=date, prediction=rainfall_prediction)
+                    else:
+                        return "Invalid day input."
+                else:
+                    return "Error fetching forecast data."
+            except ValueError:
+                return "Error: The coordinates format is incorrect. Please select a valid place."
         else:
-            return "Error fetching forecast data."
+            return "Error: No coordinates provided. Please select a place."
 
 if __name__ == "__main__":
     app.run(debug=True)
