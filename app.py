@@ -61,7 +61,7 @@ def predict_rainfall(weather_data, model):
 # Define route for the homepage
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('homepage.html')
 
 # Route for handling form submission
 @app.route('/Predict', methods=['POST'])
