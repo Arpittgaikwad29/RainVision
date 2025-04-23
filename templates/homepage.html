@@ -13,7 +13,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #2C3E50;
+            background-color: #2C3E50;  /* Dark Blue */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -23,96 +23,118 @@
             font-family: 'Arial', sans-serif;
             transition: transform 1s ease-in-out;
         }
+
         .welcome.slide-out {
             transform: translateY(-100%);
         }
+
+        /* Main Content */
         body {
             margin: 0;
             padding: 0;
-            background-color: #ECF0F1;
-            color: #2C3E50;
-            height: 100vh;
-            overflow: hidden;
+            background-color: #ECF0F1;  /* Light Gray */
+            color: #2C3E50;  /* Dark Blue */
+            height: 100vh;  /* Full height */
+            overflow: hidden;  /* Hide overflow */
         }
+
+        /* Map */
         #map {
-            position: fixed;
+            position: fixed;  /* Fixed position for full background */
             top: 0;
             left: 0;
-            height: 100vh;
-            width: 100vw;
-            z-index: 1;
+            height: 100vh;  /* Full viewport height */
+            width: 100vw;  /* Full viewport width */
+            z-index: 1;  /* Behind other content */
         }
+
         .main-content {
-            position: relative;
-            z-index: 2;
-            text-align: left;
+            position: relative;  /* Position relative to the map */
+            z-index: 2;  /* In front of the map */
+            text-align: left;  /* Align text to the left */
             padding: 20px;
-            opacity: 0;
+            opacity: 0;  /* Start hidden, will fade in */
             transition: opacity 0.5s ease-in-out;
-            width: 300px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            margin: 20px;
+            width: 300px;  /* Width of the content box */
+            background-color: rgba(255, 255, 255, 0.8);  /* Semi-transparent background */
+            border-radius: 10px;  /* Rounded corners */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);  /* Box shadow */
+            margin: 20px;  /* Margin for spacing */
         }
+
         .title {
             font-size: 3rem;
             margin-bottom: 20px;
-            color: #1A1A1A;
+            color: #1A1A1A;  /* Dark color for title */
         }
+
         form {
             margin-top: 20px;
             display: inline-block;
             text-align: left;
-            width: 100%;
+            width: 100%;  /* Full width of the form */
         }
+
         label {
             display: block;
             margin: 10px 0;
             font-size: 1.2rem;
         }
-        select, button {
+
+        select,
+        button {
             padding: 10px;
             font-size: 1rem;
             width: 100%;
             margin: 10px 0;
-            border: 1px solid #2C3E50;
+            border: 1px solid #2C3E50;  /* Dark Blue */
             border-radius: 5px;
         }
-        select:focus, button:focus {
+
+        select:focus, 
+        button:focus {
             outline: none;
-            border-color: #18BC9C;
+            border-color: #18BC9C;  /* Turquoise */
         }
+
         button {
-            background-color: #18BC9C;
+            background-color: #18BC9C;  /* Turquoise */
             color: white;
             border: none;
             cursor: pointer;
             transition: background-color 0.3s ease-in-out;
         }
+
         button:hover {
-            background-color: #16A085;
+            background-color: #16A085;  /* Slightly darker Turquoise */
         }
+
         #error-msg {
-            color: #E74C3E;
+            color: #E74C3E;  /* Red */
             margin-top: 5px;
             font-size: 0.9rem;
         }
+
+        /* For mobile responsiveness */
         @media (max-width: 768px) {
             .title {
                 font-size: 2.5rem;
             }
-            select, button {
+
+            select, 
+            button {
                 font-size: 0.9rem;
             }
         }
+
+        /* Position title on the left */
         .rainvision-title {
             position: absolute;
             top: 20px;
             left: 20px;
             font-size: 2.5rem;
-            color: #1A1A1A;
-            z-index: 2;
+            color: #1A1A1A;  /* Dark color */
+            z-index: 2;  /* In front of the map */
         }
     </style>
 </head>
@@ -123,7 +145,7 @@
 
     <div class="rainvision-title">RainVision</div>
     <div class="main-content" id="main-content">
-        <form id="predict-form" action="/Predict" method="POST">
+        <form action="/Predict" method="POST">
             <label for="place">Place:</label>
             <select id="place-dropdown" name="place">
                 <option value="">Select Place</option>
@@ -170,63 +192,54 @@
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const mainContent = document.getElementById('main-content');
-        const placeDropdown = document.getElementById('place-dropdown');
-        const coordinatesInput = document.getElementById('coordinates');
-        const form = document.getElementById('predict-form');
-        const errorMsg = document.getElementById('error-msg');
+        // Initialize the map
+        var map = L.map('map').setView([19.0760, 72.8777], 12); // Centered on Mumbai
 
-        // Welcome animation
-        setTimeout(() => {
-            welcomeScreen.classList.add('slide-out');
-            setTimeout(() => {
-                welcomeScreen.style.display = 'none';
-                mainContent.style.opacity = 1;
-            }, 1000);
-        }, 2000);
-
-        // Initialize map
-        const map = L.map('map').setView([19.0760, 72.8777], 12);
+        // Add a tile layer to the map
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
         }).addTo(map);
 
-        // Update coordinates on place selection
-        placeDropdown.addEventListener('change', function () {
-            const selectedOption = this.options[this.selectedIndex];
+        // Welcome screen animation
+        var welcomeScreen = document.getElementById('welcome-screen');
+        var mainContent = document.getElementById('main-content');
+
+        setTimeout(function() {
+            welcomeScreen.classList.add('slide-out');
+            setTimeout(function() {
+                welcomeScreen.style.display = 'none'; // Hide welcome screen
+                mainContent.style.opacity = 1; // Fade in main content
+            }, 1000);
+        }, 2000);
+
+        // Function to handle place selection
+        document.getElementById('place-dropdown').addEventListener('change', function() {
+            var selectedOption = this.options[this.selectedIndex];
             if (selectedOption.value) {
-                const coords = selectedOption.getAttribute('data-coords').split(',');
-                const lat = parseFloat(coords[0]);
-                const lng = parseFloat(coords[1]);
-                map.setView([lat, lng], 14);
-                coordinatesInput.value = `${lat},${lng}`;
+                var coords = selectedOption.getAttribute('data-coords').split(',');
+                var lat = parseFloat(coords[0]);
+                var lng = parseFloat(coords[1]);
+                map.setView([lat, lng], 14); // Zoom in on selected place
+                // Update coordinates hidden input
+                document.getElementById('coordinates').value = lat + ',' + lng;
             } else {
+                // Reset map view to default
                 map.setView([19.0760, 72.8777], 12);
-                coordinatesInput.value = '';
+                document.getElementById('coordinates').value = '';
             }
         });
 
-        // Add marker on map click and update hidden input
-        map.on('click', function (e) {
-            const lat = e.latlng.lat;
-            const lng = e.latlng.lng;
-            coordinatesInput.value = `${lat},${lng}`;
+        // Function to handle map click event
+        map.on('click', function(e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+            // Update coordinates hidden input
+            document.getElementById('coordinates').value = lat + ',' + lng;
 
+            // Optionally, you can also add a marker to indicate the clicked location
             L.marker([lat, lng]).addTo(map)
-                .bindPopup(`Coordinates: ${lat.toFixed(5)}, ${lng.toFixed(5)}`)
+                .bindPopup("Coordinates: " + lat.toFixed(5) + ", " + lng.toFixed(5))
                 .openPopup();
-        });
-
-        // Validate coordinates on form submit
-        form.addEventListener('submit', function (e) {
-            const coordsPattern = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
-            if (!coordsPattern.test(coordinatesInput.value)) {
-                e.preventDefault();
-                errorMsg.textContent = "The coordinates format is incorrect. Please select a valid place or click on the map.";
-            } else {
-                errorMsg.textContent = '';
-            }
         });
     </script>
 </body>
