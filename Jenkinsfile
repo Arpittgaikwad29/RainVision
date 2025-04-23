@@ -16,7 +16,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                echo 'No tests added yet — add unit tests here!'
+                sh 'python3 -m unittest test_predict.py'
             }
         }
 
